@@ -116,7 +116,7 @@ disqusShortname = ""
     dateFormat = "2006-01-02"
 
     # display the estimated reading time for an article
-    showReadingTime = false
+    showReadingTime = true
 
     # Minimum word count to display the Table of Contents
     tocMinWordCount = 400
@@ -126,14 +126,14 @@ disqusShortname = ""
 
     # How many articles should be displayed at latest posts in the footer?
     # Set to -1 to hide the 'Latest Posts' column
-    amountLatestPostsInFooter = 7
+    amountLatestPostsInFooter = 5
 
     # How many categories should be displayed in the footer section?
     # Set to -1 to hide the 'Categories' column
     amountCategoriesInFooter = 7
 
     # show a language chooser in the footer
-    showFooterLanguageChooser = true
+    showFooterLanguageChooser = false
 
     # social media profile urls for the footer links
     showSocialMedia = true

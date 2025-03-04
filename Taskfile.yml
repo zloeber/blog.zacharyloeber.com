@@ -239,6 +239,7 @@ tasks:
       - git clone https://github.com/Lednerb/bilberry-hugo-theme.git
 
   upload:search:index:
+    desc: Update Algolia search indexes
     cmds:
       - |
         cd {{.ROOT_DIR}}/blog/algolia
@@ -248,6 +249,7 @@ tasks:
             -a $ALGOLIA_APP_ID \
             -k $ALGOLIA_ADMIN_API_KEY \
             -n $ALGOLIA_INDEX_NAME
+
   clean:
     cmds:
       - rm -rf {{.ROOT_DIR}}/blog/public
