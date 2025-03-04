@@ -1,0 +1,170 @@
+---
+title: 'Exchange 2010/2013: Database Leveling Script'
+author: Zachary Loeber
+type: post
+date: 2014-01-07T22:08:16+00:00
+url: /blog/2014/01/07/exchange-20102013-database-leveling-script/
+categories:
+  - Exchange
+  - Exchange 2010
+  - Microsoft
+  - Powershell
+  - System Administration
+tags:
+  - Exchange 2010
+  - Exchange 2013
+  - Microsoft
+  - network administration
+  - Powershell
+  - PSC
+  - Sysadmin
+  - System Administration
+
+---
+It is common to randomly choose mailbox databases when creating or migrating user mailboxes in Exchange. I actually recommend this practice unless you are setting up a tiered user/storage environment. Unfortunately this may result in an unequal distribution of data which, in turn, can result in an environment where mailbox databases are wildly different in size. In this post I will discuss an approach to leveling the databases so they are equal in size by moving mailboxes between them.
+
+<!--more-->
+
+Imagine if you will, a scenario where you are given several buckets of indefinite depth filled with random objects of varying weight. How do you go about making each bucket as close to one another in weight by moving the least amount of objects from one bucket to another? This sounds like something directly out of a computer logic 101 course or possibly even a bad interview question but it is actually has some real world value. One of the practical applications of this would be leveling out an Exchange DAG or set of databases so that they are equal in size (perhaps after adding a new database).
+
+I’ve tucked this question away mentally for a few years now with the intention of eventually searching online for the algorithm which must already exist for this scenario. This chilly holiday season, while the children and wife slept soundly with dreams of Christmas treats, I stayed awake and finally started looking for some algorithmic solution to this issue. I dusted off my math neurons and started white boarding out what needs to be done. To my surprise the solution was more complicated than I initially imagined.
+
+> **Note:** If you don’t care at all about how this works then you can blissfully ignore everything below. Here is a [shortcut to the code][1] instead.
+
+## Leveling Two Bins
+
+To start, it is good to know the basic steps you might follow to automatically redistribute objects with the fewest moves possible between two bins with the end goal of making the bin overall sizes equal. This will allow us to come up with some general rules and, in the process, add some more requirements we didn’t realize we had.
+
+For each of these examples I’ve included the total, average, and the absolute difference of the bins at each move.
+
+### Example 1
+
+Here is an easy example where the bins are filled unequally and which do not redistribute evenly.
+
+<p align="center">
+  <a href="/wp-content/uploads/2014/01/image.png"><img style="margin: 0px; display: inline; background-image: none;" title="image" alt="image" src="/wp-content/uploads/2014/01/image_thumb.png?resize=244%2C164" width="244" height="164" border="0" data-recalc-dims="1" /></a>
+</p>
+
+For the first move we postulate our first rule. Move the largest object possible from the larger bin to the smaller bin. So the first move is logical, move the object weighing 5 from bin 2 to bin 1.
+
+<p align="center">
+  <a href="/wp-content/uploads/2014/01/image1.png"><img style="margin: 0px; display: inline; background-image: none;" title="image" alt="image" src="/wp-content/uploads/2014/01/image_thumb1.png?resize=244%2C162" width="244" height="162" border="0" data-recalc-dims="1" /></a>
+</p>
+
+This reduces the difference between the bins down from 12 to 2 so it is a great start. Following our prior logic, let’s go ahead and move another object from Bin 2 to Bin 1:
+
+<p align="center">
+  <a href="/wp-content/uploads/2014/01/image2.png"><img style="margin: 0px; display: inline; background-image: none;" title="image" alt="image" src="/wp-content/uploads/2014/01/image_thumb2.png?resize=244%2C162" width="244" height="162" border="0" data-recalc-dims="1" /></a>
+</p>
+
+Uh oh, after this the difference between the two bins has actually gone up so we have gone too far. The second rule becomes obvious; _move the largest object from the larger bin to the smaller bin as long as it does not result in the bin size difference increasing_. In this case the only object we could move was 5, which is greater than the difference between the two bins so we wouldn’t even try to move it.
+
+So in this example we stop at move 1 as we can no longer move any more elements from the larger bin to the smaller bin without increasing the difference between the two bins.
+
+### Example 2
+
+Here we have a few more objects per bin. The first steps we’ve already seen in example 1.
+
+<p align="center">
+  <a href="/wp-content/uploads/2014/01/image3.png"><img style="margin: 0px; display: inline; background-image: none;" title="image" alt="image" src="/wp-content/uploads/2014/01/image_thumb3.png?resize=244%2C76" width="244" height="76" border="0" data-recalc-dims="1" /></a>
+</p>
+
+At the third move, were we to follow our prior rule, we would end up in an endless loop as we would be moving the same element back to bin 2 that we moved to bin 1 in the prior steps. So, instead, we move over the next element from bin 1 to 2 which has **not** been previously moved. This adds another rule; _once an object has been moved between bins it is invalidated for future moves_.
+
+<p align="center">
+  <a href="/wp-content/uploads/2014/01/image4.png"><img style="margin: 0px; display: inline; background-image: none;" title="image" alt="image" src="/wp-content/uploads/2014/01/image_thumb4.png?resize=244%2C75" width="244" height="75" border="0" data-recalc-dims="1" /></a>
+</p>
+
+If we follow this through to the end the bins come out even. Here is one more rule which probably doesn’t need to be stated but…. _If the difference between two bins becomes zero or there are no valid items which can be moved between bins we are done processing._
+
+<p align="center">
+  <a href="/wp-content/uploads/2014/01/image5.png"><img style="margin: 0px; display: inline; background-image: none;" title="image" alt="image" src="/wp-content/uploads/2014/01/image_thumb5.png?resize=244%2C160" width="244" height="160" border="0" data-recalc-dims="1" /></a>
+</p>
+
+### Example 3
+
+Here is a simplified version of example 3. Following our previous rules the very first move leaves us in a position where there is no change in the absolute difference between bins.
+
+<p align="center">
+  <a href="/wp-content/uploads/2014/01/image6.png"><img style="margin: 0px; display: inline; background-image: none;" title="image" alt="image" src="/wp-content/uploads/2014/01/image_thumb6.png?resize=244%2C62" width="244" height="62" border="0" data-recalc-dims="1" /></a>
+</p>
+
+If you look at the bin totals after the move has been performed in Step 1 you will see that Bin 1 becomes larger than Bin 2. In these cases wouldn’t it make sense to attempt to swap an element (if it exists) from Bin 1 which is less than this future difference created by Step 1? Well it is actually very important we do so in these scenarios. This is largely for when we apply this algorithm to more than two bins.
+
+This gives us another rule which sounds more complex than it actually is: _When moving an object from one bin to another causes the smaller bin to become greater than the larger bin then attempt to swap back another object which is less than or equal to the future difference between the bins._
+
+<p align="center">
+  <a href="/wp-content/uploads/2014/01/image7.png"><img style="margin: 0px; display: inline; background-image: none;" title="image" alt="image" src="/wp-content/uploads/2014/01/image_thumb7.png?resize=190%2C126" width="190" height="126" border="0" data-recalc-dims="1" /></a>
+</p>
+
+If you have been reading up to this point and following along you can go back to example 2 and reprocess with our additional rules to come up with the same results in a few less cycles (but same number of object moves).
+
+### Example 4
+
+In this example let’s start out with wildly unbalanced bins and perform the first move.
+
+<p align="center">
+  <a href="/wp-content/uploads/2014/01/image8.png"><img style="margin: 0px; display: inline; background-image: none;" title="image" alt="image" src="/wp-content/uploads/2014/01/image_thumb8.png?resize=244%2C75" width="244" height="75" border="0" data-recalc-dims="1" /></a>
+</p>
+
+After the first move we have followed all of the rules, are done processing, and have the fewest number of moves possible to get the bins as equal as we possibly can get them to be. But in order to get things equal we had to move one object which is 25 times larger than all the other objects combined.
+
+Logically it makes sense to move the one largest object as it gets the results we are looking to achieve. But realistically I’d rather expend less effort moving more small items between the two bins than worry so much about moving the fewest number of elements overall. As long as the results are the same in the end.
+
+This gives us one more objective we weren’t originally looking for when we started. Our updated objective is to _move as few objects as possible between the bins without surpassing a predefined percentage of total bin effort threshold_.
+
+So in our prior example, if the predefined effort threshold is the average bin size (where any object in any bin is ignored if it is larger than or equal to the average bin size), then only the two smaller items get moved. This leaves the larger item in bin 2 but causes one more move to occur, which we are fine with.
+
+<p align="center">
+  <a href="/wp-content/uploads/2014/01/image9.png"><img style="margin: 0px; display: inline; background-image: none;" title="image" alt="image" src="/wp-content/uploads/2014/01/image_thumb9.png?resize=244%2C161" width="244" height="161" border="0" data-recalc-dims="1" /></a>
+</p>
+
+## Flowchart – Leveling 2 Bins
+
+If we use the logic we have deduced to this point for leveling two bins we end up with a fairly simple flow chart. It is worth adding that the choice to not move any object which is equal to or greater than the average bin size is variable. Playing around with this number may be required to get the best results.
+
+<p align="center">
+  <a href="/wp-content/uploads/2014/01/image10.png"><img style="margin: 0px; display: inline; background-image: none;" title="image" alt="image" src="/wp-content/uploads/2014/01/image_thumb10.png?resize=184%2C244" width="184" height="244" border="0" data-recalc-dims="1" /></a>
+</p>
+
+For the most part this will allow us to balance out any set of bins with the same results in a predictable manner. Unfortunately, adding in more bins complicates the entire process so we are not done yet.
+
+## Leveling More Than Two Bins
+
+If you start adding more and more bins you still need some of the same bits of information to make decisions from when determining which objects you will need to move. The most important information will be the size differences between them. You would think that this would create very large tables of differences as you get more and more bins. But actually the table size is relatively small. You only need unique differences between each pair of bins. For those who like their combinational algebra the equation for the number of elements in our table goes something like this:
+
+n = Number of bins
+
+r = Number of bins to find unique combinations between (in our case 2)
+
+<p style="text-align: center;">
+  <img src="//s0.wp.com/latex.php?latex=%5Cbinom%7Bn%7D%7Br%7D+%3D+%5Cfrac%7Bn%21%7D%7Br%21%28n-r%29%21%7D&#038;bg=ffffff&#038;fg=000&#038;s=0" alt="&#92;binom{n}{r} = &#92;frac{n!}{r!(n-r)!}" title="&#92;binom{n}{r} = &#92;frac{n!}{r!(n-r)!}" class="latex" />
+</p>
+
+So for three bins we end up with a table of differences totaling a whopping three elements. If you were to go up to 5 bins, that increases to 10. If you had 10 bins then it only increases to 45 differences. Anyway, you get the picture. If we were attempting to level thousands of bins then it would be beneficial to look into breaking down the bins into reasonable subsets based on their average size (differentiating between bins which are below and above average and possibly combining them in subsets together based on your need). Then using multithreaded code to do the processing.
+
+In my case I’m only looking to get a reasonable approximation of the best way to level no more than several bins so I’m not going to overcomplicate the solution. As it is easy to manually deduce the best way to level 3 bins that is what I’ll be using for my examples.
+
+### Example 1
+
+<p align="center">
+  <a href="/wp-content/uploads/2014/01/image11.png"><img style="margin: 0px; display: inline; background-image: none;" title="image" alt="image" src="/wp-content/uploads/2014/01/image_thumb11.png?resize=244%2C77" width="244" height="77" border="0" data-recalc-dims="1" /></a>
+</p>
+
+I’ve included the absolute difference in size between each unique set of bins. The very first conundrum we run into is which set of bins to process first as there are two sets which have the same absolute difference. The answer is that it doesn’t matter at all so I simply start with bins 1 and 2.
+
+If I follow our prior flowchart then we will move the 4 object from bin 2 to bin 1 first. This will cause bin 1 to become greater than bin 2 so we evoke our swap rule. The swap takes place between the bins as there is an object in bin 1 which is less than the future difference between the bins after the initial move from bin 2.
+
+<p align="center">
+  <a href="/wp-content/uploads/2014/01/image12.png"><img style="margin: 0px; display: inline; background-image: none;" title="image" alt="image" src="/wp-content/uploads/2014/01/image_thumb12.png?resize=244%2C184" width="244" height="184" border="0" data-recalc-dims="1" /></a>
+</p>
+
+After the first step has been performed we recalculate all the differences where there are bins which were involved in step 1. In an example of three bins all combinations of bins will be affected by any single object swap (It is important to note that this may not always be the case, as you add more bins there are more combinations which are not affected by a single move between bins).
+
+The very next step occurs between bin 3 and 1 as it has the largest difference of the three combinations. We do the same thing we did in step one where we move an object from bin 3 to bin 1, evoke our swap rule due to bin 1 becoming larger than bin 3, and swap back an object. When we are done with step 2 we have fully leveled our bins in only 4 total object moves.
+
+## Script
+
+Using these examples and some powershell trickery I&#8217;ve come up with a method of leveling databases in exchange by moving mailboxes between them. There are some interesting techniques employed which may benefit a curious crowd which are not Exchange administrators as well. You can download the most recent version of this script from the [Microsoft technet gallery][1]. As always I welcome feedback.
+
+ [1]: http://gallery.technet.microsoft.com/Leveling-Exchange-Database-3e9cdbc9

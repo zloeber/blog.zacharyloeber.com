@@ -1,0 +1,8 @@
+publish
+blog/public
+docs
+preview
+blog/resources/_gen
+blog/.hugo_build.lock
+blog/assets/js/bundle.js
+bilberry-hugo-theme

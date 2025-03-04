@@ -1,0 +1,250 @@
+# yaml-language-server: $schema=https://taskfile.dev/schema.json
+
+## NOTE: Don't update this file if you are syncing via vendir.
+##       Create/update ./Taskfile.custom.yml instead!
+version: "3"
+silent: true
+env:
+  TARGET:
+    sh: 'echo "${TARGET:-"default"}"'
+  PROFILE:
+    sh: 'echo "${PROFILE:-"default"}"'
+  PROJECT:
+    sh: 'echo "$(basename $(pwd))"'
+  LOCAL_BIN_PATH:
+    sh: 'echo "{{.ROOT_DIR}}/venv/bin"'
+  BUILD_DATE:
+    sh: "date '+%Y-%m-%d-%H:%M:%S'"
+  BUILD_DATE_SHORT:
+    sh: "date '+%Y-%m-%d-%H%M%S'"
+  # GIT_LATEST_TAG:
+  #   sh: 'git tag -l 2>/dev/null | sort -r -V | head -n 1 2>/dev/null || echo "not a git repo"'
+  TERM: screen-256color
+  DOCS_PATH: "{{.ROOT_DIR}}/docs"
+  PYTHON_VENV_PATH: "{{.ROOT_DIR}}/venv"
+  SCRIPT_PATH: "{{.ROOT_DIR}}/scripts"
+  VERSION: '{{default "unknown" .GIT_LATEST_TAG}}'
+  SSH_AUTHORIZED_KEY: ~/.ssh/id_rsa.pub
+  SSH_HOST_KEY:
+    sh: echo "~/.ssh/${HOST}-id_rsa.pub"
+  AGE_CONFIG_PATH: "~/.config/sops/age"
+
+# env:
+#   AUTHOR_NAME: '{{default "{{.AUTHOR_NAME}}" "git" }}'
+#   AUTHOR_EMAIL: '{{default "{{.AUTHOR_EMAIL}}" "git@nowhere" }}'
+
+dotenv:
+  - ".SECRETS.env"
+
+includes:
+  variables:
+    taskfile: ./Taskfile.vars.yml
+    optional: true
+  agebox:
+    taskfile: ./tasks/Taskfile.agebox.yml
+    optional: true
+  ansible:
+    taskfile: ./tasks/Taskfile.ansible.yml
+    optional: true
+  argocd:
+    taskfile: ./tasks/Taskfile.argocd.yml
+    optional: true
+  aws:
+    taskfile: ./tasks/Taskfile.aws.yml
+    optional: true
+  cdk:
+    taskfile: ./tasks/Taskfile.cdk.yml
+    optional: true
+  chatgpt:
+    taskfile: ./tasks/Taskfile.chatgpt.yml
+    optional: true
+  cloudflared:
+    taskfile: ./tasks/Taskfile.cloudflared.yml
+    optional: true
+  cluster:
+    taskfile: ./tasks/Taskfile.cluster.yml
+    optional: true
+  docker:
+    taskfile: ./tasks/Taskfile.docker.yml
+    optional: true
+  dotnet:
+    taskfile: ./tasks/Taskfile.dotnet.yml
+    optional: true
+  dynamodb:
+    taskfile: ./tasks/Taskfile.dynamodb.yml
+    optional: true
+  flux:
+    taskfile: ./tasks/Taskfile.flux.yml
+    optional: true
+  format:
+    taskfile: ./tasks/Taskfile.format.yml
+    optional: true
+  github:
+    taskfile: ./tasks/Taskfile.github.yml
+    optional: true
+  gitlab:
+    taskfile: ./tasks/Taskfile.gitlab.yml
+    optional: true
+  git:
+    taskfile: ./tasks/Taskfile.git.yml
+    optional: true
+  go:
+    taskfile: ./tasks/Taskfile.go.yml
+    optional: true
+  helmfile:
+    taskfile: ./tasks/Taskfile.helmfile.yml
+    optional: true
+  hugo:
+    taskfile: ./tasks/Taskfile.hugo.yml
+    optional: true
+  kube:
+    taskfile: ./tasks/Taskfile.kube.yml
+    optional: true
+  lint:
+    taskfile: ./tasks/Taskfile.lint.yml
+    optional: true
+  openapi:
+    taskfile: ./tasks/Taskfile.openapi.yml
+    optional: true
+  pi:
+    taskfile: ./tasks/Taskfile.pi.yml
+    optional: true
+  precommit:
+    taskfile: ./tasks/Taskfile.precommit.yml
+    optional: true
+  python:
+    taskfile: ./tasks/Taskfile.python.yml
+    optional: true
+  sops:
+    taskfile: ./tasks/Taskfile.sops.yml
+    optional: true
+  steampipe:
+    taskfile: ./tasks/Taskfile.steampipe.yml
+    optional: true
+  system:
+    taskfile: ./tasks/Taskfile.system.yml
+    optional: true
+  terraform:
+    taskfile: ./tasks/Taskfile.terraform.yml
+    optional: true
+  vault:
+    taskfile: ./tasks/Taskfile.vault.yml
+    optional: true
+  workspace:
+    taskfile: ./tasks/Taskfile.workspace.yml
+    optional: true
+  workstation:
+    taskfile: ./tasks/Taskfile.workstation.yml
+    optional: true
+  custom:
+    taskfile: ./Taskfile.custom.yml
+    optional: true
+
+tasks:
+  default:
+    cmds:
+      - |
+        task -l
+
+  show:
+    desc: Show task variables
+    cmds:
+      - |
+        echo "ROOT_PATH: {{.ROOT_DIR}}"
+        echo "PROFILE: {{.PROFILE}}"
+        echo "PROJECT: {{.PROJECT}}"
+        echo "VERSION: {{.VERSION}}"
+        echo "OS: {{OS}}"
+        echo "ARCH: {{ARCH}}"
+        echo "LOCAL_BIN_PATH: {{.LOCAL_BIN_PATH}}"
+        echo "DOCS_PATH: {{.DOCS_PATH}}"
+        echo "PYTHON_VENV_PATH: {{.PYTHON_VENV_PATH}}"
+        echo "SCRIPT_PATH: {{.SCRIPT_PATH}}"
+        echo "BUILD_DATE: {{.BUILD_DATE}}"
+        echo "GIT_LATEST_TAG: {{.GIT_LATEST_TAG}}"
+
+  show:all:
+    desc: Show all variables for task namespaces
+    cmds:
+      - |
+        echo "## Show ##";
+        task show
+        echo ""
+        for taskitem in $(task -l | cut -d " " -f2 | grep show | sed 's/.$//'); do
+          if [[ "$taskitem" != "show:all" ]]; then
+            echo "## Show - ${taskitem} ##";
+            task $taskitem;
+            echo "";
+          fi
+        done
+
+  list:
+    desc: List tasks by namespace (task list -- <namespace>)
+    cmds:
+      - |
+        if [[ "{{.CLI_ARGS}}" != "" ]]; then
+          task -l | grep {{default "" .CLI_ARGS}}
+        else
+          task -l
+        fi
+
+  toc:
+    desc: Update the table of contents in README.md
+    cmds:
+      - |
+        source {{.LOCAL_BIN_PATH}}/activate
+        mdtoc README.md
+
+  secrets:
+    desc: Create template .SECRETS file if one does not already exist.
+    cmds:
+      - cp ./config/.SECRETS.example.env ./.SECRETS.env
+    status:
+      - "test -f .SECRETS.env"
+
+  autocomplete:
+    desc: Setup task autocomplete (zsh)
+    cmds:
+      - sudo curl https://raw.githubusercontent.com/go-task/task/main/completion/zsh/_task \
+        -o /usr/local/share/zsh/site-functions/_task
+    status:
+      - "test -f /usr/local/share/zsh/site-functions/_task"
+
+  fix:permalinks:
+    desc: Fix permalinks in blog markdown files
+    dir: "blog"
+    env:
+      CONTENT_PATH: "content"
+    cmds:
+      - |
+        # Set the target directory
+        echo "Fixing front-matter for ${BLOG_PATH}"
+
+        # Find all *.md files recursively in the target directory
+        find "$BLOG_PATH" -type f -name "*.md" | while read -r file; do
+          echo "$file"
+          front_matter=$(sed -n '/^---$/,/^---$/p' "$file" || echo "")
+          # Extract the Permalink value from the front matter
+          permalink=$(echo "$front_matter" | grep -oP '^Permalink:\s*\K.*' || echo "")
+
+          if [[ "${permalink}" != "" ]]; then
+            # Convert the permalink to lowercase, ensure it ends with a '/', and replace invalid characters with '_'
+            new_permalink=$(echo "$permalink" | tr '[:upper:]' '[:lower:]' | sed 's/[^a-z0-9\/._-]/_/g')
+            if [[ "${new_permalink: -1}" != "/" ]]; then
+              new_permalink="${new_permalink}/"
+            fi
+            if [[ "$new_permalink" != "$permalink" ]]; then
+              echo "Updating $file with the new permalink: ${new_permalink}"
+              sed -i "s|^Permalink: ${permalink}|Permalink: ${new_permalink}|" "$file"
+            fi
+          fi
+        done
+
+  blog:theme:
+    cmds:
+      - git clone https://github.com/Lednerb/bilberry-hugo-theme.git
+
+  clean:
+    cmds:
+      - rm -rf {{.ROOT_DIR}}/blog/public
+      - rm -rf {{.ROOT_DIR}}/resources/_gen

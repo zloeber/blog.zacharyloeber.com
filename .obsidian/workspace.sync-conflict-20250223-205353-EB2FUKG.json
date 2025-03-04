@@ -1,0 +1,259 @@
+{
+  "main": {
+    "id": "b059c68276d72ac9",
+    "type": "split",
+    "children": [
+      {
+        "id": "43cdc10221096db7",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "e8421c0daafd3b31",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "Daily/2025-01-26.md",
+                "mode": "source",
+                "backlinks": true,
+                "source": false
+              },
+              "icon": "lucide-file",
+              "title": "2025-01-26"
+            }
+          },
+          {
+            "id": "e87ca8b055b3fe0f",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "Projects/Metagit/Architecture.md",
+                "mode": "source",
+                "backlinks": true,
+                "source": false
+              },
+              "icon": "lucide-file",
+              "title": "Architecture"
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "vertical"
+  },
+  "left": {
+    "id": "85567947b29bb066",
+    "type": "split",
+    "children": [
+      {
+        "id": "7eb8be691f81fc55",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "b77de9621b756585",
+            "type": "leaf",
+            "state": {
+              "type": "file-explorer",
+              "state": {
+                "sortOrder": "alphabetical"
+              },
+              "icon": "lucide-folder-closed",
+              "title": "Files"
+            }
+          },
+          {
+            "id": "c90d119475d0d5bb",
+            "type": "leaf",
+            "state": {
+              "type": "search",
+              "state": {
+                "query": "",
+                "matchingCase": false,
+                "explainSearch": false,
+                "collapseAll": false,
+                "extraContext": false,
+                "sortOrder": "alphabetical"
+              },
+              "icon": "lucide-search",
+              "title": "Search"
+            }
+          },
+          {
+            "id": "8b7c4b522d4609dc",
+            "type": "leaf",
+            "state": {
+              "type": "bookmarks",
+              "state": {},
+              "icon": "lucide-bookmark",
+              "title": "Bookmarks"
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "horizontal",
+    "width": 324.5
+  },
+  "right": {
+    "id": "bb72de5beeec9d5d",
+    "type": "split",
+    "children": [
+      {
+        "id": "3f2761886907e6fa",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "6fa1a285d4cbc401",
+            "type": "leaf",
+            "state": {
+              "type": "backlink",
+              "state": {
+                "file": "Home/Network.md",
+                "collapseAll": false,
+                "extraContext": false,
+                "sortOrder": "alphabetical",
+                "showSearch": false,
+                "searchQuery": "",
+                "backlinkCollapsed": false,
+                "unlinkedCollapsed": true
+              },
+              "icon": "links-coming-in",
+              "title": "Backlinks for Network"
+            }
+          },
+          {
+            "id": "7feac32895d2ae5c",
+            "type": "leaf",
+            "state": {
+              "type": "outgoing-link",
+              "state": {
+                "file": "Home/Network.md",
+                "linksCollapsed": false,
+                "unlinkedCollapsed": true
+              },
+              "icon": "links-going-out",
+              "title": "Outgoing links from Network"
+            }
+          },
+          {
+            "id": "4acf266987586779",
+            "type": "leaf",
+            "state": {
+              "type": "tag",
+              "state": {
+                "sortOrder": "frequency",
+                "useHierarchy": true
+              },
+              "icon": "lucide-tags",
+              "title": "Tags"
+            }
+          },
+          {
+            "id": "cd0229599611cb04",
+            "type": "leaf",
+            "state": {
+              "type": "outline",
+              "state": {
+                "file": "Home/Network.md"
+              },
+              "icon": "lucide-list",
+              "title": "Outline of Network"
+            }
+          },
+          {
+            "id": "21b94649321ad353",
+            "type": "leaf",
+            "state": {
+              "type": "all-properties",
+              "state": {
+                "sortOrder": "frequency",
+                "showSearch": false,
+                "searchQuery": ""
+              },
+              "icon": "lucide-archive",
+              "title": "All properties"
+            }
+          },
+          {
+            "id": "48acf43ed0a76c8b",
+            "type": "leaf",
+            "state": {
+              "type": "git-view",
+              "state": {},
+              "icon": "git-pull-request",
+              "title": "Source Control"
+            }
+          }
+        ],
+        "currentTab": 5
+      }
+    ],
+    "direction": "horizontal",
+    "width": 200
+  },
+  "left-ribbon": {
+    "hiddenItems": {
+      "meld-encrypt:New encrypted note": false,
+      "meld-encrypt:Convert to or from an Encrypted note": false,
+      "meld-encrypt:Encrypt/Decrypt": false,
+      "table-editor-obsidian:Advanced Tables Toolbar": false,
+      "obsidian-git:Open Git source control": false,
+      "graph:Open graph view": false,
+      "canvas:Create new canvas": false,
+      "daily-notes:Open today's daily note": false,
+      "templates:Insert template": false,
+      "command-palette:Open command palette": false
+    }
+  },
+  "active": "e8421c0daafd3b31",
+  "lastOpenFiles": [
+    "SPR/Interviews/2025-01-08 - Saad.md",
+    "Daily/2025-01-26.md",
+    "SPR/Interviews/2025-01-08 - Abdul Khan.md",
+    "SPR/Interviews/2025-01-08 - Sukumar Lalapeta.md",
+    "SPR/Interviews/2025-01-09 - Syed Moin.md",
+    "SPR/Interviews/2025-01-09 - Siva Ravi.md",
+    "Projects/Bilder/Securat.md",
+    "Projects/Metagit/Architecture.md",
+    "Projects/Bilder",
+    "SPR/Interviews/2025-01-09 - Harold Estes.md",
+    "Home/Network.md",
+    "SPR/Ulta/ServiceNow Questions.md",
+    "Projects/Homelab/To Look Into.md",
+    "SPR/Ulta/ServiceNow Roles.md",
+    "ServiceNow/Overview.md",
+    "ServiceNow",
+    "SPR/Ulta",
+    "Blog/Drafts/HashiCorp Vault as a Shared Platform.md",
+    "Pasted image 20250107122917.png",
+    "Pasted image 20250107122240.png",
+    "().md",
+    "Blog/Drafts/provisioning-hashicorp-vault-1.md",
+    "Blog/Drafts/kubernetes-ephemeral-containers.md",
+    "Daily/2025-01-07.md",
+    "SPR/PwC.md",
+    "Blog/Drafts/the-raw-helm-chart.md",
+    "Blog/Drafts/centralized-gitops-secrets-management.md",
+    "Blog/Drafts/scratch.md",
+    "Blog/Ideas/The Enterprise Strikes Back.md",
+    "Blog/Ideas/Ideas.md",
+    "Blog/Ideas/DevOps Basics - Git Collaboration Strategy.md",
+    "Pasted image 20250106150400.png",
+    "Pasted image 20240602204314.png",
+    "Pasted image 20240602204301.png",
+    "Pasted image 20240602204114.png",
+    "Untitled 20250103 043254.mdenc",
+    "Daily",
+    "Linux",
+    "Notes/Daily",
+    "Home/Charlie",
+    "SPR/Personal",
+    "Blog/images/blog/circuit.jpg",
+    "Blog/images/blog/imperative-land.jpg",
+    "Blog/images/blog/shady_hacker.png",
+    "Blog/images/blog/gears.png",
+    "Blog/images/workshop",
+    "Untitled.canvas"
+  ]
+}
