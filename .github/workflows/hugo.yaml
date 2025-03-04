@@ -40,6 +40,10 @@ jobs:
           && sudo dpkg -i ${{ runner.temp }}/hugo.deb
       - name: Install Dart Sass
         run: sudo snap install dart-sass
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 23
       - name: Checkout
         uses: actions/checkout@v4
         with:
@@ -55,8 +59,8 @@ jobs:
           HUGO_CACHEDIR: ${{ runner.temp }}/hugo_cache
           HUGO_ENVIRONMENT: production
           TZ: America/Chicago
+        working-directory: ./blog
         run: |
-          cd blog
           hugo \
             --gc \
             --minify \
@@ -65,6 +69,16 @@ jobs:
         uses: actions/upload-pages-artifact@v3
         with:
           path: ./blog/public
+      - name: Upload Data
+        working-directory: ./blog/algolia
+        run: |
+          source ../../.env
+          npm install
+          npm run data-upload -- -c \
+            -f ../public/index.json \
+            -a $ALGOLIA_APP_ID \
+            -k ${{ secrets.ALGOLIA_ADMIN_API_KEY }} \
+            -n $ALGOLIA_INDEX_NAME  
 
   # Deployment job
   deploy:

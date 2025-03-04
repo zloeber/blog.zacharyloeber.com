@@ -24,16 +24,10 @@ env:
   PYTHON_VENV_PATH: "{{.ROOT_DIR}}/venv"
   SCRIPT_PATH: "{{.ROOT_DIR}}/scripts"
   VERSION: '{{default "unknown" .GIT_LATEST_TAG}}'
-  SSH_AUTHORIZED_KEY: ~/.ssh/id_rsa.pub
-  SSH_HOST_KEY:
-    sh: echo "~/.ssh/${HOST}-id_rsa.pub"
   AGE_CONFIG_PATH: "~/.config/sops/age"
 
-# env:
-#   AUTHOR_NAME: '{{default "{{.AUTHOR_NAME}}" "git" }}'
-#   AUTHOR_EMAIL: '{{default "{{.AUTHOR_EMAIL}}" "git@nowhere" }}'
-
 dotenv:
+  - ".env"
   - ".SECRETS.env"
 
 includes:
@@ -244,6 +238,16 @@ tasks:
     cmds:
       - git clone https://github.com/Lednerb/bilberry-hugo-theme.git
 
+  upload:search:index:
+    cmds:
+      - |
+        cd {{.ROOT_DIR}}/blog/algolia
+        npm install
+        npm run data-upload -- -f \
+          ../public/index.json \
+            -a $ALGOLIA_APP_ID \
+            -k $ALGOLIA_ADMIN_API_KEY \
+            -n $ALGOLIA_INDEX_NAME
   clean:
     cmds:
       - rm -rf {{.ROOT_DIR}}/blog/public
