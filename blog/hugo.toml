@@ -80,7 +80,7 @@ disqusShortname = ""
 
   # Header configuration
     # your subtitle if you want to use any
-    subtitle = "I eat complexity and am never without a meal."
+    subtitle = "Just another tool making, complexity eating, infrastructure and workload automating, DevOps soldier."
 
     # if you want to use libravatar or gravatar for the header image
     avatarEmail = "zloeber@gmail.com"
