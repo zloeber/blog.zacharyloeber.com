@@ -4,6 +4,8 @@
 ##       Create/update ./Taskfile.custom.yml instead!
 version: "3"
 silent: true
+vars:
+  PROJECT_PATH: "blog"
 env:
   TARGET:
     sh: 'echo "${TARGET:-"default"}"'

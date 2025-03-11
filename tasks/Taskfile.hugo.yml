@@ -9,9 +9,8 @@ env:
   BASEURL: http://localhost/
   DISQUSSHORTNAME: zacharyloeber-com
   POST_DATE: "{{.BUILD_DATE_SHORT}}"
-
-  # Construct the hugow wrapper for most operations (may take this out later)
-  hugo_cmd: hugo --baseURL "{{.BASEURL}}" --configDir "{{.PROJECTPATH}}" --config config.toml --destination "{{.PUBLISHPATH}}"
+  # Construct the hugo wrapper for most operations (may take this out later)
+  hugo_cmd: hugo -s "{{.PROJECT_PATH}}"
 
 tasks:
   show:
@@ -27,9 +26,10 @@ tasks:
         echo "PUBLISHPATH: {{.PUBLISHPATH}}"
         echo "POST_DATE: {{.POST_DATE}}"
         echo "hugo_cmd (cmd): {{.hugo_cmd}}"
+        echo "PROJECT_PATH: {{.PROJECT_PATH}}"
 
   # Deployment configuration settings
-  # dpl ?= $(PROJECTPATH)/config/$(HUGO_TARGET_ENV).env
+  # dpl ?= $(PROJECT_PATH)/config/$(HUGO_TARGET_ENV).env
   # -include $(dpl)
   # export $(shell sed 's/=.*//' $(dpl))
 
@@ -37,7 +37,13 @@ tasks:
     desc: Start a local http server on all interfaces
     cmds:
       - |
-        {{.hugo_cmd}}  -w --buildDrafts server
+        hugo -s {{.PROJECT_PATH}} -w server
+  
+  serve:drafts:
+    desc: Start a local http server on all interfaces (with drafts)
+    cmds:
+      - |
+        hugo -s {{.PROJECT_PATH}} -w --buildDrafts server
 
   preview:
     desc: Generate the website content (with drafts)
