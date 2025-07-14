@@ -8,3 +8,4 @@ blog/assets/js/bundle.js
 bilberry-hugo-theme
 **/node_modules
 .SECRETS.env
+.DS_Store
