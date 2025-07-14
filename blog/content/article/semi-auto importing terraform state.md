@@ -1,0 +1,246 @@
+---
+title: "Semi Auto Importing Terraform State"
+featuredImage: /images/banners/banner-innovation-1-750x250.jpg
+Permalink: /blog/2025/04/15/from-llm-to-lean-microservices/
+date: 2025-07-14T09:25:51-05:00
+draft: false
+
+categories:
+  - devops
+  - terraform
+  - Python
+tags: 
+  - devops
+  - terraform
+  - Python
+toc: false
+author: Zachary Loeber
+---
+
+On more than one occasion I've longed for the mean's to automatically import terraform state. But this is a feature I know will likely never be added for a number of very good reasons. In some cases it is possible to use only a plan file to automate the generation of terraform import blocks though. Here is how it can be done.
+
+<!--more-->
+
+## TLDR
+
+This blog, script, and example can be found [here](https://github.com/zloeber/terraform-semi-auto-import/) 
+
+## Use Case
+
+You have created a slew of terraform modules or code for resources that already exist and would like to import them into your state via terraform `import` blocks.
+
+## Why No Auto Import?
+
+For a long time I've wondered why terraform does not include a native ability to automatically import targeted state elements. It 'feels' like it would be such a killer feature to have when you need to refactor a bunch of infrastructure as code or add it where none existed before. But a deeper inspection on this yields several reasons that this feature will never be added.
+
+### 1. Ambiguity
+
+Terraform relies on explicit code definitions in `.tf` files to know what resources to manage.
+
+Auto-import would require Terraform to guess the appropriate HCL configuration for each resource. This would be error-prone or incomplete, especially for:
+
+- Resources with complex dependencies
+- Resources using computed values, modules, or for_each/count
+- Custom logic or dynamic blocks
+
+### 2. Lack of 1:1 Mapping from API → HCL
+
+Many cloud resources have non-obvious or lossy mappings between API responses and HCL syntax.
+
+> **Example**: AWS IAM policies, ECS task definitions, security group rules, etc., may include generated or optional data not present in Terraform configs.
+
+Some fields are ignored by Terraform or only exist as computed outputs, meaning Terraform can't regenerate full HCL from state.
+
+Analogy: It's like trying to reverse-engineer source code from a compiled binary — possible in some cases, but often messy.
+
+### 3. Tooling Complexity
+
+Implementing robust auto-import across providers would require:
+
+- Parsing provider schemas for every resource type
+- Generating idiomatic HCL, including nested blocks
+- Ensuring generated code matches best practices
+- Handling drift or manual configuration inconsistencies
+
+This is difficult to maintain across hundreds of providers and thousands of resource types.
+
+### 4. Risk of State Drift or Mismanagement
+
+Automatically importing resources could lead to:
+
+- Accidental overwrites of unmanaged resources
+- Misalignment between actual infrastructure and expectations in code
+- Users thinking resources are safely managed when they aren't
+
+Terraform's import is deliberately manual and opt-in to prevent such surprises.
+
+### 5. Terraform's Design Philosophy: Explicit is Better
+
+HashiCorp prefers a conservative, explicit workflow where users:
+
+- Define resources in HCL
+- Import them manually using terraform import
+- Verify state and code alignment
+
+This makes changes and intentions clear, especially in regulated or production environments.
+
+## So What? I Need This!
+
+The built in options are:
+
+1. Use terraform cli to manually import each state element with the correct ID and target after running your plan.
+2. Use terraform's built in import blocks to perform one-time state import in your pipeline.
+
+Either option is a manual slog. But in some cases we can use a code generation approach against an existing plan file (in json) to emit all the import statements for new resources you know already exist. This can be done with clever mapping for predictable provider resources and the process works like this:
+
+1. Author the initial terraform manifests
+2. `terraform init`
+3. `terraform plan -out=plan.tfplan`
+4. `terraform show -no-color -json plan.tfplan | jq > plan.json`
+5. Look up the import schema to determine the import id format and, more importantly, if you already have all the data you need to construct the id within your existing plan file.
+6. Create an id map for your import data. This should target one or more providers and can include any known data you already have or that can be scraped from the existing plan file (see example further on).
+7. Run the [this script](https://github.com/zloeber/terraform-semi-auto-import/) with your plan json data and the map file to create a new set of import commands. `uv run ./import-terraform.py ./plan.json new_imports.tf --id-map ./import_map.yaml`
+8. `terraform plan -out=plan.tfplan` --> If this shows only imports and additions then you likely are ready to apply. If not, then review what went wrong or how your mappings are defined to ensure they are accurate.
+
+> **NOTE 1** In step 4 I use jq to make the resulting output prettier for you to visually parse later when making your map file.
+
+> **NOTE 2** Each map file is going to be highly dependant on your needs! I've yet to figure out how to import the appropriate schema to automate this process for a target provider. Import ids can be wildly different based on the provider and resource. See `./import_map.aws.example.yaml` for one that merges several data points into a single id for instance.
+
+## How The Script Works
+
+This script first parses out the `resource_changes` of the plan file for anything with `change.action` == `create`. It then correlates each item found to a map file entry based on the provider and resource name. If one exists, it extrapolates the ID map for an import block based on the same created resource's `change.after` data. Finally it uses all this to generate a valid import block for the target resource.
+
+This means we can only auto-import predictable terraform based on named elements. We do not auto pull data from any outside resources which limits the scope of what can be imported using this method. For example, a new ec2 instance would be impossible to auto-import using this method. This is because the instance id required for the import block would never be available in our plan file data. But one could still produce some template import blocks using this script, then post-process the results with another script that replaces the output with found aws instances! 
+
+## Requirements
+
+Install requirements via uv: `uv sync`
+
+You can also use mise to install terraform and python and uv if required `mise install -y` (also included in `./configure.sh`)
+
+## Example
+
+A fairly poor but working example of how to do this can be found in the `./example` path. Local resources do not lend themselves well to importing state so I used a local vault deployment with the hashicorp/vault terraform provider instead. Here is how you can run through this example locally:
+
+```bash
+cd examples
+
+# Start local vault dev instance
+docker compose up -d
+
+# export the dev root token
+export VAULT_TOKEN=dev-token-12345
+
+# perform initial deployment
+
+terraform init
+terraform plan -out plan.tfplan
+terraform apply plan.tfplan
+
+# delete the local state then get your plan as json again.
+rm ./terraform.tfstate ./terraform.tfstate.backup
+terraform show -no-color -json plan.tfplan | jq > plan.json
+```
+
+At this point you will need to figure out the import id by visiting the terraform provider documentation (I know of no way to scrape import id schema automatically anywhere). So I dropped into the terraform provider [website](https://registry.terraform.io/providers/hashicorp/vault/latest) for vault and looked up the `vault_mount` and `vault_kv_secret_v2` resources. I discovered that that they both require just a path to import. Sweet! Lets start with the `vault_mount` resource. I inspect the plan json output for the `vault_mount` create resource data and zero in on the `after` section for the created resource:
+
+```json
+{
+      "address": "vault_mount.kv",
+      "mode": "managed",
+      "type": "vault_mount",
+      "name": "kv",
+      "provider_name": "registry.terraform.io/hashicorp/vault",
+      "change": {
+        "actions": [
+          "create"
+        ],
+        "before": null,
+        "after": {
+          "allowed_managed_keys": null,
+          "allowed_response_headers": null,
+          "delegated_auth_accessors": null,
+          "description": "KV Version 2 secret engine",
+          "external_entropy_access": false,
+          "identity_token_key": null,
+          "listing_visibility": null,
+          "local": null,
+          "namespace": null,
+          "options": {
+            "version": "2"
+          },
+          "passthrough_request_headers": null,
+          "path": "kv",
+          "plugin_version": null,
+          "type": "kv"
+        },
+        ...
+```
+
+Looks like they give us `path` straight away so the start of our map file looks like this:
+
+```yaml
+registry.terraform.io/hashicorp/vault:
+  vault_mount:
+    id: "{path}"
+```
+
+Now if we look at the next resource, `vault_kv_secret_v2`, we see something like this:
+
+```json
+{
+      "address": "vault_kv_secret_v2.secrets[\"user-credentials\"]",
+      "mode": "managed",
+      "type": "vault_kv_secret_v2",
+      "name": "secrets",
+      "index": "user-credentials",
+      "provider_name": "registry.terraform.io/hashicorp/vault",
+      "change": {
+        "actions": [
+          "create"
+        ],
+        "before": null,
+        "after": {
+          "cas": null,
+          "data_json": "{\"admin_password\":\"secure_password_123\",\"admin_username\":\"admin\",\"last_backup\":\"2024-01-15T10:30:00Z\",\"user_count\":\"150\"}",
+          "data_json_wo": null,
+          "data_json_wo_version": null,
+          "delete_all_versions": false,
+          "disable_read": false,
+          "mount": "kv",
+          "name": "user-credentials",
+          "namespace": null,
+          "options": null
+        },
+        ...
+```
+
+No path! But we can make the correct path with `mount` and `name` so that becomes our mapping to complete our map file.
+
+```yaml
+registry.terraform.io/hashicorp/vault:
+  vault_mount:
+    id: "{path}"
+  vault_kv_secret_v2:
+    id: "{mount}/data/{name}"
+```
+
+> **NOTE:** An astute reader will notice that I included the 'data' section in that path. This is just a nuance of Vault kv version 2 that I happen to know already. It is also a good example of how you can manually tweak these mappings.
+
+Now that we have this we can create the import block file and proceed to replan with it in place to import all the existing paths.
+
+```bash
+uv run ../import-terraform.py ./plan.json kv_imports.tf --id-map ./import_map.yaml
+terraform plan -out plan.tfplan
+terraform apply plan.tfplan
+```
+
+This will pull in the existing secrets as state and recreate your state file as it was before you deleted it.
+
+## Improvements
+
+The manual part of this, creating map file entries, is pretty hard to automate. We could theoretically automate it somewhat using AI that scrapes the terraform registry documentation for each resource found and seeks out the import requirements to then generate the map entries. Or we could (somewhat dangerously) try to evoke terraform import commands with a bogus id and scrape the returned errors as some providers (such as AWS) will give useful errors for id format issues.
+
+I am also fascinated by the [terraformer](https://github.com/GoogleCloudPlatform/terraformer) project's ability to create terraform from existing resources for several dozen providers. Perhaps there is some way to generate import commands instead of painfully large terraform manifests with some clever engineering of it's source code.
+
+If anyone has better options for this arduous process leave a comment, I'm keen to know what I'm missing here. Otherwise, maybe this script will help get you part of the way to clean terraform state. May all your terraform pipelines run green my friends!

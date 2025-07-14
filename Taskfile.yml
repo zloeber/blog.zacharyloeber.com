@@ -4,8 +4,6 @@
 ##       Create/update ./Taskfile.custom.yml instead!
 version: "3"
 silent: true
-vars:
-  PROJECT_PATH: "blog"
 env:
   TARGET:
     sh: 'echo "${TARGET:-"default"}"'
@@ -28,64 +26,21 @@ env:
   VERSION: '{{default "unknown" .GIT_LATEST_TAG}}'
   AGE_CONFIG_PATH: "~/.config/sops/age"
 
+vars:
+  CONTENT_PATH: "{{.ROOT_DIR}}/blog"
+  POST_DATE: "{{.BUILD_DATE_SHORT}}"
+  hugo_cmd: "hugo"
+
 dotenv:
   - ".env"
   - ".SECRETS.env"
 
 includes:
-  variables:
-    taskfile: ./Taskfile.vars.yml
-    optional: true
-  agebox:
-    taskfile: ./tasks/Taskfile.agebox.yml
-    optional: true
-  ansible:
-    taskfile: ./tasks/Taskfile.ansible.yml
-    optional: true
-  argocd:
-    taskfile: ./tasks/Taskfile.argocd.yml
-    optional: true
-  aws:
-    taskfile: ./tasks/Taskfile.aws.yml
-    optional: true
-  cdk:
-    taskfile: ./tasks/Taskfile.cdk.yml
-    optional: true
-  chatgpt:
-    taskfile: ./tasks/Taskfile.chatgpt.yml
-    optional: true
-  cloudflared:
-    taskfile: ./tasks/Taskfile.cloudflared.yml
-    optional: true
-  cluster:
-    taskfile: ./tasks/Taskfile.cluster.yml
-    optional: true
-  docker:
-    taskfile: ./tasks/Taskfile.docker.yml
-    optional: true
-  dotnet:
-    taskfile: ./tasks/Taskfile.dotnet.yml
-    optional: true
-  dynamodb:
-    taskfile: ./tasks/Taskfile.dynamodb.yml
-    optional: true
-  flux:
-    taskfile: ./tasks/Taskfile.flux.yml
-    optional: true
-  format:
-    taskfile: ./tasks/Taskfile.format.yml
-    optional: true
   github:
     taskfile: ./tasks/Taskfile.github.yml
     optional: true
-  gitlab:
-    taskfile: ./tasks/Taskfile.gitlab.yml
-    optional: true
   git:
     taskfile: ./tasks/Taskfile.git.yml
-    optional: true
-  go:
-    taskfile: ./tasks/Taskfile.go.yml
     optional: true
   helmfile:
     taskfile: ./tasks/Taskfile.helmfile.yml
@@ -93,48 +48,13 @@ includes:
   hugo:
     taskfile: ./tasks/Taskfile.hugo.yml
     optional: true
-  kube:
-    taskfile: ./tasks/Taskfile.kube.yml
-    optional: true
-  lint:
-    taskfile: ./tasks/Taskfile.lint.yml
-    optional: true
-  openapi:
-    taskfile: ./tasks/Taskfile.openapi.yml
-    optional: true
-  pi:
-    taskfile: ./tasks/Taskfile.pi.yml
-    optional: true
-  precommit:
-    taskfile: ./tasks/Taskfile.precommit.yml
-    optional: true
   python:
     taskfile: ./tasks/Taskfile.python.yml
-    optional: true
-  sops:
-    taskfile: ./tasks/Taskfile.sops.yml
-    optional: true
-  steampipe:
-    taskfile: ./tasks/Taskfile.steampipe.yml
-    optional: true
-  system:
-    taskfile: ./tasks/Taskfile.system.yml
-    optional: true
-  terraform:
-    taskfile: ./tasks/Taskfile.terraform.yml
-    optional: true
-  vault:
-    taskfile: ./tasks/Taskfile.vault.yml
     optional: true
   workspace:
     taskfile: ./tasks/Taskfile.workspace.yml
     optional: true
-  workstation:
-    taskfile: ./tasks/Taskfile.workstation.yml
-    optional: true
-  custom:
-    taskfile: ./Taskfile.custom.yml
-    optional: true
+
 
 tasks:
   default:
@@ -146,18 +66,19 @@ tasks:
     desc: Show task variables
     cmds:
       - |
-        echo "ROOT_PATH: {{.ROOT_DIR}}"
-        echo "PROFILE: {{.PROFILE}}"
+        echo "ROOT_DIR: {{.ROOT_DIR}}"
         echo "PROJECT: {{.PROJECT}}"
         echo "VERSION: {{.VERSION}}"
         echo "OS: {{OS}}"
         echo "ARCH: {{ARCH}}"
-        echo "LOCAL_BIN_PATH: {{.LOCAL_BIN_PATH}}"
         echo "DOCS_PATH: {{.DOCS_PATH}}"
-        echo "PYTHON_VENV_PATH: {{.PYTHON_VENV_PATH}}"
         echo "SCRIPT_PATH: {{.SCRIPT_PATH}}"
         echo "BUILD_DATE: {{.BUILD_DATE}}"
         echo "GIT_LATEST_TAG: {{.GIT_LATEST_TAG}}"
+        echo "hugo_cmd (cmd): {{.hugo_cmd}}"
+        echo "CONTENT_PATH: {{.CONTENT_PATH}}"
+        echo "POST_DATE: {{.POST_DATE}}"
+        echo "ALGOLIA_INDEX_NAME: ${ALGOLIA_INDEX_NAME}"
 
   show:all:
     desc: Show all variables for task namespaces
@@ -256,3 +177,18 @@ tasks:
     cmds:
       - rm -rf {{.ROOT_DIR}}/blog/public
       - rm -rf {{.ROOT_DIR}}/resources/_gen
+  
+  article:
+    desc: Create a new article
+    cmds:
+      - |
+        if [[ "{{.CLI_ARGS}}" == "" ]]; then
+          echo "Usage: task article -- <title>"
+          exit 1
+        fi
+        {{.hugo_cmd}} -s {{.CONTENT_PATH}} new content article/{{.POST_DATE}}-{{.CLI_ARGS}}.md
+  
+  open:
+    desc: Open the website
+    cmds:
+      - open "https://${ALGOLIA_INDEX_NAME}"
