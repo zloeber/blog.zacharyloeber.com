@@ -1,7 +1,7 @@
 ---
 title: "2025 08 04 224627 Vendoring Terraform Modules With Git Subtree"
 date: 2025-08-04T22:46:31-05:00
-draft: true
+draft: false
 featuredImage: "/images/blog/gears.png"
 categories: ["devops", "git", "terraform", "cicd"]
 tags: ["terraform", "cicd", "devops", "git"]
@@ -140,6 +140,7 @@ Otherwise, stick with the registry or direct git module references which should 
 
 
 ## Appendix: Subtree Cheat Sheet
+
 |Action|Command|
 |---|---|
 |Add remote	|`git remote add <name> <url>`|
