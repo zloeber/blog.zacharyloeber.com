@@ -2,7 +2,7 @@
 title: "Vendoring Terraform Modules With Git Subtree"
 date: 2025-08-04T22:46:31-05:00
 draft: false
-featuredImage: "/images/blog/gears.png"
+featuredImage: "/images/banners/banner-agile-750x187.jpg"
 Permalink: /blog/2025/08/04/vendoring_terraform_modules_with_git_subtree/
 categories: ["devops", "git", "terraform", "cicd"]
 tags: ["terraform", "cicd", "devops", "git"]
