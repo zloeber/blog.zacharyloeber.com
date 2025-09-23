@@ -29,8 +29,8 @@ The workflow is not so hard really:
 ```mermaid
 flowchart TD
     A[Existing Resources] --> B[Terraformer]
-    B --> C["Terraform Files (.tf)"]
-    C --> D["Local Terraform State (.tfstate)"]
+    B --> C["Terraform Files"]
+    C --> D["Local Terraform State"]
     D -->|Migrate State| E["Remote State"]
 ```
 
