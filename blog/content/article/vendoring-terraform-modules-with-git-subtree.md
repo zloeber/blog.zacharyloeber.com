@@ -9,6 +9,10 @@ toc: true
 author: "Zachary Loeber"
 ---
 
+In this article I'll go over a less obvious way to vendor in outside modules into your terraform code base.
+
+<!--more-->
+
 # Vendoring Terraform Modules with Git Subtree
 
 (When I do it and why you probably shouldn't)
@@ -19,7 +23,7 @@ Did you know you can vendor in third-party terraform modules in your projects?
 
 Before you close the tab and scream "but module versioning exists!", let me explain why this technique may actually *reduce* complexity and increase reliability in some situations. 
 
----
+
 
 ## Why Vendor a Terraform Module?
 

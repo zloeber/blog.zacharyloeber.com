@@ -1,7 +1,7 @@
 ---
 title: "Semi Auto Importing Terraform State"
 featuredImage: /images/banners/banner-innovation-1-750x250.jpg
-Permalink: /blog/2025/04/15/from-llm-to-lean-microservices/
+Permalink: /blog/2025/04/15/semi-auto-importing-terraform-state/
 date: 2025-07-14T09:25:51-05:00
 draft: false
 
