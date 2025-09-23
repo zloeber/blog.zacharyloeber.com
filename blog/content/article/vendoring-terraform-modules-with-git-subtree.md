@@ -1,8 +1,9 @@
 ---
-title: "2025 08 04 224627 Vendoring Terraform Modules With Git Subtree"
+title: "Vendoring Terraform Modules With Git Subtree"
 date: 2025-08-04T22:46:31-05:00
 draft: false
 featuredImage: "/images/blog/gears.png"
+Permalink: /blog/2025/08/04/vendoring_terraform_modules_with_git_subtree/
 categories: ["devops", "git", "terraform", "cicd"]
 tags: ["terraform", "cicd", "devops", "git"]
 toc: true
