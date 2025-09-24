@@ -181,12 +181,12 @@ disqusShortname = ""
   [markup.goldmark]
     [markup.goldmark.renderer]
       # change to 'true' if you need to render raw HTML within your markdown content
-      unsafe = false
+      unsafe = true
   [markup.highlight]
     anchorLineNos = false
     codeFences = true
     guessSyntax = false
-    hl_Lines = ''
+    
     hl_inline = false
     lineAnchors = ''
     lineNoStart = 1

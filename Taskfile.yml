@@ -28,6 +28,7 @@ env:
 
 vars:
   CONTENT_PATH: "{{.ROOT_DIR}}/blog"
+  PROJECT_PATH: "{{.ROOT_DIR}}/blog"
   POST_DATE: "{{.BUILD_DATE_SHORT}}"
   hugo_cmd: "hugo"
 

@@ -29,9 +29,9 @@ The workflow is not so hard really:
 ```mermaid
 flowchart TD
     A[Existing Resources] --> B[Terraformer]
-    B --> C["Terraform Files"]
-    C --> D["Local Terraform State"]
-    D -->|Migrate State| E["Remote State"]
+    B --> C[Terraform Files]
+    C --> D[Local Terraform State]
+    D -->|Migrate State| E[Remote State]
 ```
 
 > The terraformer tool can also import directly into remote state but I'm opting out of doing this as I wish to rewrite the generated manifests to not give me seizures when reading them.
