@@ -187,7 +187,7 @@ tasks:
           echo "Usage: task article -- <title>"
           exit 1
         fi
-        {{.hugo_cmd}} -s {{.CONTENT_PATH}} new content article/{{.POST_DATE}}-{{.CLI_ARGS}}.md
+        {{.hugo_cmd}} -s {{.CONTENT_PATH}} new content article/{{.CLI_ARGS}}.md
   
   open:
     desc: Open the website
