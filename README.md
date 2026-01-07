@@ -1,6 +1,0 @@
-| Strategic Pillar | 2026 Initiative | Business Impact | 
-|---|---|---|
-| Operational Excellence & Financial Prudence | Complete the final phase of DNS centralization by decommissioning remaining site-local DNS servers. | Reduces infrastructure complexity, lowers maintenance overhead, and improves network reliability and performance across all sites. |
-| Self-Service & Automation | Expand the shared Terraform module library and promote adoption of self-owned GitLab pipelines to two additional major project teams. | Increases developer velocity, enforces security and compliance through code, and reduces the support burden on the central infrastructure team. |
-| Enterprise Security | Pilot and develop a deployment plan for "IAM roles anywhere" to provide secure, credential-less access for on-premise data sources feeding into AWS services. | Eliminates a class of standing credentials, strengthening the security posture for hybrid workloads and simplifying access management. 
-| Operational Excellence & Financial Prudence | Implement a continuous rightsizing program, utilizing QuickSite analytics to identify and remediate underutilized EC2 and RDS resources on a quarterly basis. | Drives sustained cost savings, improves resource efficiency, and embeds financial accountability within workload-owning teams. |
